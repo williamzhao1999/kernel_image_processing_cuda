@@ -106,7 +106,7 @@ int main()
         //images.push_back(entry.path());
         //std::cout << entry.path() << std::endl;
     }
-    images.push_back("../images/road-7504719-640.png");
+    images.push_back("../images/road-7504719_1280.png");
 
 
 
@@ -188,7 +188,7 @@ int main()
         cudaMalloc(&output_data_gpu_green,size);
         cudaMalloc(&output_data_gpu_blue,size);
 
-        for(int j = 0; j < 1;j++) {
+        for(int j = 0; j < filters.size();j++) {
 
             char* kernel = NULL;
             cudaMalloc(&kernel,FILTER_SIZE*FILTER_SIZE);
