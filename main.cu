@@ -6,6 +6,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include "png.h"
+#include "KernelImageProcessing.h"
 
 namespace fs = std::filesystem;
 
@@ -51,7 +52,7 @@ __global__ void convolution(unsigned char*  out,  unsigned char* in, size_t pitc
     int x_o = (TILE_SIZE * blockIdx.x) + threadIdx.x;
     int y_o = (TILE_SIZE * blockIdx.y) + threadIdx.y;
 
-    //center
+    //first position
     int x_i = x_o - (FILTER_SIZE/2);
     int y_i = y_o - (FILTER_SIZE/2);
     float sum = 0;
@@ -102,9 +103,10 @@ int main()
     std::string path = "../images/";
     std::string targetPath = "../filtered_images/";
     for (const auto & entry : fs::directory_iterator(path)){
-        images.push_back(entry.path());
+        //images.push_back(entry.path());
         //std::cout << entry.path() << std::endl;
     }
+    images.push_back("../images/road-7504719-640.png");
 
 
 
