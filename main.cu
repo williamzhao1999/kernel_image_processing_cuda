@@ -107,7 +107,7 @@ int main()
         //std::cout << entry.path() << std::endl;
     }
     //images.push_back("../images/road-7504719-4500.png");
-    //images.push_back("../images/road-7504719-6000.png");
+    images.push_back("../images/road-7504719-6000.png");
     //images.push_back("../images/road-7504719_1920.png");
     //images.push_back("../images/road-7504719_1280.png");
     //images.push_back("../images/road-7504719_640.png");
@@ -194,7 +194,7 @@ int main()
         cudaMalloc(&output_data_gpu_blue,size);
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-        for(int j = 0; j < 1;j++) {
+        for(int j = 0; j < filters.size();j++) {
 
             char* kernel = NULL;
             cudaMalloc(&kernel,FILTER_SIZE*FILTER_SIZE);
@@ -210,24 +210,24 @@ int main()
 
             cudaDeviceSynchronize();
 
-            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-            int timeDifference = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-            std::cout << "Elapsed Time: " << timeDifference << std::endl;
+
 
             cudaMemcpy(output_image_pixel_red, output_data_gpu_red, size, cudaMemcpyDeviceToHost);
             cudaMemcpy(output_image_pixel_green, output_data_gpu_green, size, cudaMemcpyDeviceToHost);
             cudaMemcpy(output_image_pixel_blue, output_data_gpu_blue, size, cudaMemcpyDeviceToHost);
 
             // Convert output data to PNG image
-            pngio::rgb3toPng(output_image_pixel_red,output_image_pixel_green,output_image_pixel_blue,input_image);
+            //pngio::rgb3toPng(output_image_pixel_red,output_image_pixel_green,output_image_pixel_blue,input_image);
 
-            std::string targetFilePathName = targetPath + filtersName[j] + "_" +  std::string(fs::path(filePath).filename());
-            input_image.write(targetFilePathName);
-            std::cout << "Saved in " << targetFilePathName << std::endl;
+            //std::string targetFilePathName = targetPath + filtersName[j] + "_" +  std::string(fs::path(filePath).filename());
+            //input_image.write(targetFilePathName);
+            //std::cout << "Saved in " << targetFilePathName << std::endl;
 
             cudaFree(kernel);
         }
-
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        int timeDifference = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+        std::cout << "Elapsed Time: " << timeDifference << std::endl;
 
 
 
