@@ -106,9 +106,14 @@ int main()
         //images.push_back(entry.path());
         //std::cout << entry.path() << std::endl;
     }
-    images.push_back("../images/road-7504719_1280.png");
+    //images.push_back("../images/road-7504719-4500.png");
+    //images.push_back("../images/road-7504719-6000.png");
+    //images.push_back("../images/road-7504719_1920.png");
+    //images.push_back("../images/road-7504719_1280.png");
+    //images.push_back("../images/road-7504719_640.png");
 
 
+    //images.push_back("../images/original_image.png");
 
     auto showMatrix = [&](float* matrix,int width, int height){
         for(int i = 0; i < height; i++){
@@ -129,7 +134,7 @@ int main()
     std::vector<int> factor {16,9,1};
     const std::vector<std::string> filtersName {"GaussianBlur","BoxBlurFilter", "SharpenFilter"};
 
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
 
     for(int i = 0; i < images.size();i++){
         std::string filePath = images[i];
@@ -187,8 +192,9 @@ int main()
         cudaMalloc(&output_data_gpu_red,size);
         cudaMalloc(&output_data_gpu_green,size);
         cudaMalloc(&output_data_gpu_blue,size);
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-        for(int j = 0; j < filters.size();j++) {
+        for(int j = 0; j < 1;j++) {
 
             char* kernel = NULL;
             cudaMalloc(&kernel,FILTER_SIZE*FILTER_SIZE);
@@ -196,11 +202,17 @@ int main()
 
             const int factorKernel = factor[j];
 
+
+
             convolution<<<gridSize, blockSize>>>(output_data_gpu_red, input_data_gpu_red, pitch_r, kernel, factorKernel, width, height);
             convolution<<<gridSize, blockSize>>>(output_data_gpu_green, input_data_gpu_green, pitch_g,kernel, factorKernel, width, height);
             convolution<<<gridSize, blockSize>>>(output_data_gpu_blue, input_data_gpu_blue, pitch_b,kernel, factorKernel, width, height);
 
             cudaDeviceSynchronize();
+
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+            int timeDifference = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+            std::cout << "Elapsed Time: " << timeDifference << std::endl;
 
             cudaMemcpy(output_image_pixel_red, output_data_gpu_red, size, cudaMemcpyDeviceToHost);
             cudaMemcpy(output_image_pixel_green, output_data_gpu_green, size, cudaMemcpyDeviceToHost);
@@ -287,10 +299,7 @@ int main()
 
 
     }
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    int timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
-    std::cout << "Elapsed Time: " << timeDifference << std::endl;
 
 
     return 0;
