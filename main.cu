@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 
 #define BLOCK_SIZE 16u
 #define FILTER_SIZE 3u
-#define TILE_SIZE 14u
+#define TILE_SIZE 14u // BLOCK_SIZE - (2 * (FILTER_SIZE / 2))
 
 #define CUDA_CHECK_RETURN(value){                               \
     cudaError_t err = value;                                    \
@@ -84,9 +84,6 @@ __global__ void convolution(unsigned char*  out,  unsigned char* in, size_t pitc
             out[(y_o*width)+x_o] = (int)max(0.,min(255.,sum));
         }
     }
-
-
-
 
 }
 
