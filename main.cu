@@ -136,10 +136,10 @@ int main()
 
 
 
-    for(int k = 0; k < 50; k++) {
+    //for(int k = 0; k < 50; k++) {
         bool init = false;
         std::chrono::steady_clock::time_point begin;
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < images.size(); i++) {
             std::string filePath = images[i];
 
             std::cout << "Loading image..." << std::endl;
@@ -165,10 +165,10 @@ int main()
             //Store pixel in variables
             pngio::pngToRgb3(input_image_pixel_red, input_image_pixel_green, input_image_pixel_blue, input_image);
 
-            if(init == false){
-                init = true;
-                begin = std::chrono::steady_clock::now();
-            }
+            //if(init == false){
+            //    init = true;
+            //    begin = std::chrono::steady_clock::now();
+            //}
 
             // Allocate memory on GPU
             unsigned char *input_data_gpu_red;
@@ -178,7 +178,6 @@ int main()
             size_t pitch_r = 0;
             size_t pitch_g = 0;
             size_t pitch_b = 0;
-
 
             cudaMallocPitch(&input_data_gpu_red, &pitch_r, width, height);
             cudaMallocPitch(&input_data_gpu_green, &pitch_g, width, height);
@@ -193,6 +192,7 @@ int main()
 
 
             dim3 blockSize(BLOCK_SIZE, BLOCK_SIZE);
+            std::cout << (width + TILE_SIZE - 1) / TILE_SIZE << endl;
             dim3 gridSize((width + TILE_SIZE - 1) / TILE_SIZE, (height + TILE_SIZE - 1) / TILE_SIZE);
 
             unsigned char *output_data_gpu_red;
@@ -212,7 +212,7 @@ int main()
 
                 const int factorKernel = factor[j];
 
-
+                begin = std::chrono::steady_clock::now();
                 convolution<<<gridSize, blockSize>>>(output_data_gpu_red, input_data_gpu_red, pitch_r, kernel,
                                                      factorKernel, width, height);
                 convolution<<<gridSize, blockSize>>>(output_data_gpu_green, input_data_gpu_green, pitch_g, kernel,
@@ -221,18 +221,20 @@ int main()
                                                      factorKernel, width, height);
 
                 cudaDeviceSynchronize();
-
+                std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+                int timeDifference = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+                std::cout << "Elapsed Time: " << timeDifference <<  " microseconds" << std::endl;
 
                 cudaMemcpy(output_image_pixel_red, output_data_gpu_red, size, cudaMemcpyDeviceToHost);
                 cudaMemcpy(output_image_pixel_green, output_data_gpu_green, size, cudaMemcpyDeviceToHost);
                 cudaMemcpy(output_image_pixel_blue, output_data_gpu_blue, size, cudaMemcpyDeviceToHost);
 
                 // Convert output data to PNG image
-                //pngio::rgb3toPng(output_image_pixel_red,output_image_pixel_green,output_image_pixel_blue,input_image);
+                pngio::rgb3toPng(output_image_pixel_red,output_image_pixel_green,output_image_pixel_blue,input_image);
 
-                //std::string targetFilePathName = targetPath + filtersName[j] + "_" +  std::string(fs::path(filePath).filename());
-                //input_image.write(targetFilePathName);
-                //std::cout << "Saved in " << targetFilePathName << std::endl;
+                std::string targetFilePathName = targetPath + filtersName[j] + "_" +  std::string(fs::path(filePath).filename());
+                input_image.write(targetFilePathName);
+                std::cout << "Saved in " << targetFilePathName << std::endl;
 
                 cudaFree(kernel);
             }
@@ -305,15 +307,15 @@ int main()
 
 
         }
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        int timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-        std::cout << "Elapsed Time: " << timeDifference << std::endl;
-        times.push_back(timeDifference);
-    }
+        //std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        //int timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        //std::cout << "Elapsed Time: " << timeDifference << std::endl;
+        //times.push_back(timeDifference);
+    //}
 
-    CSV v("../data.csv");
-    std::cout << "test Time size: " << times.size() << std::endl;
-    v.customWrite("Length,seq_time",times,times.size());
+    //CSV v("../data.csv");
+    //std::cout << "test Time size: " << times.size() << std::endl;
+    //v.customWrite("Length,seq_time",times,times.size());
 
     return 0;
 }
